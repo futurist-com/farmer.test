@@ -10,31 +10,49 @@ class OutlineController
 
     public $outline;
 
-    //@todo  не  нравится    как  сделать покрасивее
     public function __construct()
     {
         $this->outline = new Outline;
     }
 
+    /**
+     * get one outline by id
+     * @param int id outline
+     * @return array
+     */
     public function index($id)
     {
-        return $sql = $this->outline->select([])->where('id', $id, "=")->get();
-        //var_dump($sql);
-    }
-    public function getOwnerId($id)
-    {
-        $outline = $this->outline->getOutlinesOwner($id); 
-        //var_dump($outline);
-        return $outline;
+        $sql = $this->outline->firstId($id);
+        return $sql;
     }
 
+    /**
+     * get all outline for owner by id
+     * @param int id owner
+     * @return array 
+     */
+    public function getOwnerId($id)
+    {
+        $outline = $this->outline->getOutlinesOwner($id);
+        return $outline;
+    }
+    /**
+     * create outline 
+     * @return array created outline
+     */
     public function store()
     {
-        //придумать  валидацию
-        return $this->outline->insert(Request::all())->save();
+        $outline = $this->outline->create(Request::all());
+        return $outline;
     }
-    
-    public function update($id){
-       return $this->outline->update(Request::all())->where('id', $id, '=')->save();
+    /**
+     * update outline
+     * @param int id outline
+     * @return array updated outline
+     */
+    public function update($id)
+    {
+        $this->outline->firstId($id);
+        return $this->outline->change(Request::all());
     }
 }

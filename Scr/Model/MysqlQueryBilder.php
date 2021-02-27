@@ -2,18 +2,36 @@
 
 namespace Scr\Model;
 
-use Scr\Model\SqlQueryBilder;
+use Scr\Model\SqlQueryBuilder;
+use Scr\Model\MysqlConnect;
 
-abstract class MysqlQueryBilder implements SqlQueryBilder
+abstract class MysqlQueryBilder implements SqlQueryBuilder
 {
     protected $dbh;
     protected $query;
     protected $table;
+    private $fields;
+    public $values;
+    public $datas;
 
-    function __construct()
+    public function __construct()
     {
-        $cfg = configDb();
-        $this->dbh = new \PDO("mysql:host={$cfg['MYSQL_HOST']};dbname={$cfg['MYSQL_DATABASE']};charset=utf8mb4", $cfg['MYSQL_USERNAME'], $cfg['MYSQL_PASSWORD']);
+        $this->dbh = MysqlConnect::connection();
+        $this->init();
+    }
+
+    public function __set($name, $value)
+    {
+        if (array_key_exists($name, $this->fields)) {
+            $this->fields[$name] = $value;
+        }
+    }
+
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->fields)) {
+            return $this->fields[$name];
+        }
     }
 
     protected function reset(): void
@@ -21,7 +39,17 @@ abstract class MysqlQueryBilder implements SqlQueryBilder
         $this->query = new \stdClass();
     }
 
-    public function select(array $fields) : MysqlQueryBilder
+    protected function init()
+    {
+        $q = $this->dbh->prepare("DESCRIBE $this->table");
+        $q->execute();
+        $table_fields = $q->fetchAll(\PDO::FETCH_COLUMN);
+        foreach ($table_fields as $fields) {
+            $this->fields[$fields] = null;
+        }
+    }
+
+    public function select(array $fields = array()): MysqlQueryBilder
     {
         $this->reset();
         if (empty($fields)) {
@@ -33,7 +61,7 @@ abstract class MysqlQueryBilder implements SqlQueryBilder
         return $this;
     }
 
-    public function where(string $field, string $value, string $operator = '=') : MysqlQueryBilder
+    public function where(string $field, string $value, string $operator = '='): MysqlQueryBilder
     {
         if (!in_array($this->query->type, ['select', 'update', 'delete'])) {
             throw new \Exception("WHERE can only be added to SELECT, UPDATE OR DELETE");
@@ -43,7 +71,7 @@ abstract class MysqlQueryBilder implements SqlQueryBilder
         return $this;
     }
 
-    public function leftJoin(string $table, string $fieldTableJoin, string $fieldTable) : MysqlQueryBilder
+    public function leftJoin(string $table, string $fieldTableJoin, string $fieldTable): MysqlQueryBilder
     {
         if (!in_array($this->query->type, ['select'])) {
             throw new \Exception("WHERE can only be added to SELECT");
@@ -52,8 +80,21 @@ abstract class MysqlQueryBilder implements SqlQueryBilder
 
         return $this;
     }
-    
-    public function getSQL() //: string
+
+    public function limit(int $offset, int $start = null): MysqlQueryBilder
+    {
+        if (!in_array($this->query->type, ['select'])) {
+            throw new \Exception("LIMIT can only be added to SELECT");
+        }
+        if ($start) {
+            $this->query->limit = " LIMIT " . $start . ", " . $offset;
+        } else {
+            $this->query->limit = " LIMIT " . $offset;
+        }
+        return $this;
+    }
+
+    public function getSQL(): string
     {
         $query = $this->query;
         $sql = $query->base;
@@ -63,8 +104,8 @@ abstract class MysqlQueryBilder implements SqlQueryBilder
                 $sql .= " $query->where ";
         }
         if (($this->query->type == "insert") or ($this->query->type == "update")) {
-        //
-            $sql .= $this->pdoSet($this->datas);
+            //
+            $sql .= $this->pdoSet();
         }
         if (!empty($query->where)) {
             $sql .= " WHERE " . implode(' AND ', $query->where);
@@ -75,49 +116,70 @@ abstract class MysqlQueryBilder implements SqlQueryBilder
         $sql .= ";";
         return $sql;
     }
+
     public function get()
     {
         $sql = $this->getSql();
-        $sth = $this->dbh->query($sql)->fetchAll(\PDO::FETCH_UNIQUE);
+        $sth = $this->dbh->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
         return $sth;
     }
 
-    public function insert(array $datas): MysqlQueryBilder
+    public function  firstId($id)
     {
-        $this->reset();
-        $this->datas=$datas;
-        $this->query->base = "INSERT INTO $this->table SET ";
-        $this->query->type = 'insert';
-    
-        return $this;
+        $this->select();
+        $this->where('id', $id, '=');
+        $this->limit(1);
+        $sql = $this->getSql();
+        $sth = $this->dbh->prepare($sql);
+        $sth->execute();
+        $result = $sth->fetch(\PDO::FETCH_ASSOC);
+        foreach ($result as $key => $val) {
+            $this->__set($key, $val);
+        }
+        return $result;
     }
 
-    public function update($datas): MysqlQueryBilder
+    public function insert()
     {
-        //
+        $this->reset();
+        $this->query->base = "INSERT INTO $this->table SET ";
+        $this->query->type = 'insert';
+        $id = $this->save();
+        $data=$this->firstId($id);
+        return $data;
+    }
+
+    public function update()
+    {
         $this->reset();
         $this->query->base = "UPDATE $this->table SET ";
-        $this->datas=$datas;
         $this->query->type = 'update';
-        return $this;
+        $this->where('id', $this->id, '=');
+        $id=$this->save();
+        return $id;
     }
 
     public function save()
     {
-        $sql = $this->getsql();
+        $sql = $this->getSql();
         $stm = $this->dbh->prepare($sql);
         $stm->execute($this->values);
-        return $this->dbh->lastInsertId ();
+        return $this->dbh->lastInsertId();
     }
 
-    public function pdoSet($datas)
+    /**
+     * 
+     */
+    public function pdoSet()
     {
         $set = '';
         $values = array();
-        foreach ($datas as  $field => $val) {
+        foreach ($this->fields as  $field => $val) {
+            if($val){
             $set .= "`" . str_replace("`", "``", $field) . "`" . "=:$field, ";
             $this->values[$field] = $val;
+            }
         }
-        return  substr($set, 0, -2) ;
+        return  substr($set, 0, -2);
     }
 }

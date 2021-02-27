@@ -7,6 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticInite309f5fbb220b3d521873095005fd7b5
 {
     public static $files = array (
+        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
+        'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
+        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
         'd4b41bd348c1e7922d866feff17ae6b4' => __DIR__ . '/../..' . '/config/db.php',
     );
@@ -16,9 +20,24 @@ class ComposerStaticInite309f5fbb220b3d521873095005fd7b5
         array (
             'Scr\\' => 4,
         ),
+        'P' => 
+        array (
+            'Psr\\Http\\Message\\' => 17,
+            'Psr\\Http\\Client\\' => 16,
+        ),
+        'G' => 
+        array (
+            'GuzzleHttp\\Psr7\\' => 16,
+            'GuzzleHttp\\Promise\\' => 19,
+            'GuzzleHttp\\' => 11,
+        ),
         'F' => 
         array (
             'FastRoute\\' => 10,
+        ),
+        'D' => 
+        array (
+            'Dadata\\' => 7,
         ),
         'A' => 
         array (
@@ -31,9 +50,33 @@ class ComposerStaticInite309f5fbb220b3d521873095005fd7b5
         array (
             0 => __DIR__ . '/../..' . '/Scr',
         ),
+        'Psr\\Http\\Message\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-message/src',
+        ),
+        'Psr\\Http\\Client\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-client/src',
+        ),
+        'GuzzleHttp\\Psr7\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
+        ),
+        'GuzzleHttp\\Promise\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
+        ),
+        'GuzzleHttp\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
+        ),
         'FastRoute\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/fast-route/src',
+        ),
+        'Dadata\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/hflabs/dadata/src',
         ),
         'App\\' => 
         array (
@@ -41,11 +84,16 @@ class ComposerStaticInite309f5fbb220b3d521873095005fd7b5
         ),
     );
 
+    public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+    );
+
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInite309f5fbb220b3d521873095005fd7b5::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInite309f5fbb220b3d521873095005fd7b5::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInite309f5fbb220b3d521873095005fd7b5::$classMap;
 
         }, null, ClassLoader::class);
     }

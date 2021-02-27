@@ -7,6 +7,12 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Scr\\' => array($baseDir . '/Scr'),
+    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
+    'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
+    'GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
+    'GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
+    'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
     'FastRoute\\' => array($vendorDir . '/nikic/fast-route/src'),
+    'Dadata\\' => array($vendorDir . '/hflabs/dadata/src'),
     'App\\' => array($baseDir . '/App'),
 );

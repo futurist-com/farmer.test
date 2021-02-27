@@ -1,7 +1,6 @@
 <?php
 
-use Controller\Outline\OutlineController;
-
+//use Controller\Outline\OutlineController;
 require 'vendor/autoload.php';
 
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
@@ -9,6 +8,8 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/api/v1/outline/', 'App\Controller\Outline\OutlineController@store');
     $r->addRoute('PUT', '/api/v1/outline/{id:\d+}', 'App\Controller\Outline\OutlineController@update');
     $r->addRoute('GET', '/api/v1/owner-outline/{id:\d+}', 'App\Controller\Outline\OutlineController@getOwnerId');
+    
+    $r->addRoute('GET', '/api/v1/outline-check-adress/{id:\d+}', 'App\Controller\Outline\CheckAdressController@checkAdress');
     // {id} must be a number (\d+)
     // The /{title} suffix is optional
 });
@@ -23,7 +24,6 @@ if (false !== $pos = strpos($uri, '?')) {
 }
 $uri = rawurldecode($uri);
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
-//var_dump($routeInfo);
 switch ($routeInfo[0]) {
     case FastRoute\Dispatcher::NOT_FOUND:
         // ... 404 Not Found
