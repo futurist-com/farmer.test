@@ -4,6 +4,6 @@ namespace Scr\ExtGeoApi;
 class ExtGeoApi{
 
    static public function getExtGeoApi(IExtGeoApi $geoApi){
-        return new $geoApi;
+        return $geoApi;
     }
 }

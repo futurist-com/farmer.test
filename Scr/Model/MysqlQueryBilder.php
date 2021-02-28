@@ -48,7 +48,11 @@ abstract class MysqlQueryBilder implements SqlQueryBuilder
             $this->fields[$fields] = null;
         }
     }
-
+    /**
+     * formating sql select
+     * @param array fields
+     * @return this 
+     */
     public function select(array $fields = array()): MysqlQueryBilder
     {
         $this->reset();
@@ -60,7 +64,13 @@ abstract class MysqlQueryBilder implements SqlQueryBuilder
         $this->query->type = 'select';
         return $this;
     }
-
+    /**
+     * formating sql. add  and where
+     * @param string field
+     * @param string value
+     * @param string operator
+     * @return object this
+     */
     public function where(string $field, string $value, string $operator = '='): MysqlQueryBilder
     {
         if (!in_array($this->query->type, ['select', 'update', 'delete'])) {
@@ -70,7 +80,14 @@ abstract class MysqlQueryBilder implements SqlQueryBuilder
 
         return $this;
     }
-
+    /**
+     * formating sql. add  left join
+     * @param string table
+     * @param string field table join
+     * @param string field table
+     * @return object this
+     */
+    
     public function leftJoin(string $table, string $fieldTableJoin, string $fieldTable): MysqlQueryBilder
     {
         if (!in_array($this->query->type, ['select'])) {
@@ -80,7 +97,13 @@ abstract class MysqlQueryBilder implements SqlQueryBuilder
 
         return $this;
     }
-
+    /**
+     * formating sql. add  limit
+     * @param int offset
+     * @param int srart
+     * @return object this
+     */
+    
     public function limit(int $offset, int $start = null): MysqlQueryBilder
     {
         if (!in_array($this->query->type, ['select'])) {
@@ -93,7 +116,10 @@ abstract class MysqlQueryBilder implements SqlQueryBuilder
         }
         return $this;
     }
-
+    /**
+     * formating sql
+     * @return  string sql
+     *  */    
     public function getSQL(): string
     {
         $query = $this->query;
@@ -116,15 +142,22 @@ abstract class MysqlQueryBilder implements SqlQueryBuilder
         $sql .= ";";
         return $sql;
     }
-
-    public function get()
+    /**
+     * get data
+     * @return array data
+     */
+    public function get():array
     {
         $sql = $this->getSql();
         $sth = $this->dbh->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
         return $sth;
     }
-
-    public function  firstId($id)
+    /**
+     * get data  by id
+     * @param int id 
+     * @return array 
+     */
+    public function  firstId(int $id): array
     {
         $this->select();
         $this->where('id', $id, '=');
@@ -139,7 +172,7 @@ abstract class MysqlQueryBilder implements SqlQueryBuilder
         return $result;
     }
 
-    public function insert()
+    public function insert():array
     {
         $this->reset();
         $this->query->base = "INSERT INTO $this->table SET ";

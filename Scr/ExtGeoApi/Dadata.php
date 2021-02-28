@@ -14,8 +14,11 @@ class Dadata implements IExtGeoApi{
 
     /**
      * get address by main point
+     * @param string $point1
+     * @param string $point2
+     * @retutn string
      */
-    public function getAddress($point1, $point2)
+    public function getAddress(string $point1, string $point2):string
     {
         $adress=$this->geolocateAddress(trim($point1), trim($point2));
         $adresStr=$adress[0]["unrestricted_value"];
@@ -28,6 +31,4 @@ class Dadata implements IExtGeoApi{
     public function geolocateAddress($point1, $point2){
       return $this->dadata->geolocate('address', trim($point1), trim($point2));  
     }
-    
-    
 }
